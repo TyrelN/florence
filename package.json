@@ -1,20 +1,32 @@
 {
-  "name": "catholic-utility-bot",
+  "name": "florence",
   "version": "1.0.0",
-  "dependencies": {},
-  "description": "With catholic in this instance meaning 'comprehensive,' this bot has a broad variety of features",
+  "dependencies": {
+    "@discordjs/opus": "github:discordjs/opus",
+    "discord.js": "^12.5.1",
+    "ffmpeg-static": "^4.2.7",
+    "node-fetch": "^2.6.1",
+    "opusscript": "0.0.7",
+    "sequelize": "^6.5.0",
+    "sqlite3": "^5.0.1",
+    "ytdl-core-discord": "^1.2.5"
+  },
+  "description": "Florence is a multi-purpose discord bot",
   "main": "index.js",
   "scripts": {
     "test": "test"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/TyrelN/catholic-utility-bot.git"
+    "url": "git+https://github.com/TyrelN/Florence.git"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Tyrel Narciso",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/TyrelN/catholic-utility-bot/issues"
+    "url": "https://github.com/TyrelN/Florence/issues"
   },
-  "homepage": "https://github.com/TyrelN/catholic-utility-bot#readme"
+  "homepage": "https://github.com/TyrelN/Florence#readme",
+  "devDependencies": {
+    "ytdl-core": "^4.4.5"
+  }
 }
