@@ -14,7 +14,7 @@ display via command or perhaps as a daily message.<br>
 -In a terminal at the root project folder, type: "Node dbInit.js" To initialize a local database for the currency/shop system.<br>
 -To use the local audio and keyword detection functionality, you will need to provide your own mp3 and text files (text file must have keywords seperated by a comma) and link them within the index.js file in the appropriate areas.<br><br>
 # References:<br>
-https://discordjs.guide/
+https://discordjs.guide/<br>
 https://gabrieltanner.org/blog/dicord-music-bot
 
 
