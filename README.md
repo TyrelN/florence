@@ -12,7 +12,7 @@ display via command or perhaps as a daily message.<br>
 -Member specific audio notifications: keep a map of various members of a server, and assign a specific audio file for the bot to play as their notification in a voice channel.<br><br>
 # Setup Tips:<br>
 -In a terminal at the root project folder, type: "Node dbInit.js" To initialize a local database for the currency/shop system.<br>
--Once you've set up your own bot at https://discord.com/developers/applications/ , you will need to grab the token there and apply it to a "config.json" file with a 'token' and 'prefix' value, token being the unique bot token generated, and prefix being the key that users will type before a command<br>
+-Once you've set up your own bot at https://discord.com/developers/applications/ , you will need to grab the token there and apply it to a "config.json" file with a 'token' and 'prefix' value, token being the unique bot token generated, and prefix being the key that users will type before a command.<br>
 -To use the local audio and keyword detection functionality, you will need to provide your own mp3 and text files (text file must have keywords seperated by a comma) and link them within the index.js file in the appropriate areas.<br><br>
 # References:<br>
 https://discordjs.guide/<br>
