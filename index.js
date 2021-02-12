@@ -118,7 +118,10 @@ client.on('message', async message =>{
             await message.delete();
         }
     //below covers words and phrases the bot will always look out for
-
+    const phrase = message.content;
+    if(phrase.includes('new bot') || phrase.includes('did you make this')){
+        return message.reply(`I am indeed a bot created by Tyrel to perform a variety of functions!\n\nIf you would like to know more ${message.author.username}, type "-help" into any channel.`);
+    }
     //try to find a word in the array that can be found in the message
     const censored = words.find(word => message.content.includes(word));
     if(!censored){
@@ -126,6 +129,14 @@ client.on('message', async message =>{
     }else{
         if(currency.getBalance(message.author.id) > 5){
             await message.delete();
+            if(message.author.tag !== 'Bane Üme#8734' && message.author.tag !== 'Toi#0400' && message.author.tag !=='BlackNote#3519') {
+                console.log('should be good to change nickname')
+                try {
+                    message.member.setNickname(`naughty boy ${message.member.nickname}`);
+                } catch (err) {
+                    console.log(err);
+                }
+            }
             await message.reply('Oy, that is enough bad language from you! Time to scrub this thread clean of that message!').then((reply) => reply.delete({timeout: 10000}));
             }else{
             await message.reply(`Mind the language! We need to keep this server family-friendly.`);
