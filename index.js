@@ -1,13 +1,13 @@
 const fs = require('fs');
-const Discord = require('discord.js');
+const { Client, Collection, MessageAttachment} = require('discord.js');
 const {prefix, token} = require('./config.json');
 const {Users} = require('./dbObjects');
-const currency = new Discord.Collection();
-const client = new Discord.Client();
+const currency = new Collection();
+const client = new Client();
 const queue = new Map();
-//const members = new Map();
-client.commands = new Discord.Collection();
-client.music = new Discord.Collection();
+const members = new Map();
+client.commands = new Collection();
+client.music = new Collection();
 
 const musicFiles = fs.readdirSync('./music').filter(file => file.endsWith('.js'));
 //for every file found in this directory, set it as a known command for the discord client
@@ -21,6 +21,16 @@ for(const file of commandFiles){
     const command = require(`./commands/${file}`);
     client.commands.set(command.name, command);
 }
+//initialize and set the roster of sounds for each member
+members.set(`User#444`, new Map());
+members.get(`User#444`).set(1, 'sounds/ex1.mp3');
+members.get(`User#444`).set(2, 'sounds/ex2.mp3');
+members.get(`User#444`).set(3, 'sounds/ex3.mp3');
+
+function randomSelect(min, max){
+    return Math.floor(Math.random() * (max - min + 1) ) + min;
+}
+
 //the inspected words are stored in a text file, for easy keyword editing
 const words = fs.readFileSync('curses.txt', 'utf-8').split(',');
 
@@ -61,33 +71,52 @@ client.once('disconnect', () =>{
 });
 
 
-client.on('voiceStateUpdate', async state =>{
-    if(state.member.user.bot){
-        if (!state.connection) {
-            console.log('bot disconnected, wiping queue');
+client.on('voiceStateUpdate', async ( oldState, state) =>{
+        if(oldState.channelID === state.channelID){//this infers that the update was just mute or deafen
+            return;
+            }
+        if (state.member.user.bot) {
+            if (!state.connection) {
+                console.log('bot disconnected, wiping queue');
+                if (queue.size > 0) {
+                    queue.delete(state.guild.id);
+                }
+            }
+            return;
+        }
+        const channel = state.member.voice.channel;
+        if (channel && channel.members.size > 1) {
+            let sound = members.get(state.member.user.tag).get(randomSelect(1,3));
+            if(!sound){
+                sound = `sounds/example.mp3`;
+            }
+            const connection = await channel.join()
+            const dispatcher = connection.play(sound, { highWaterMark: 48}, {volume: false})
+
+            dispatcher.on('start', ()=>{
+                console.log('soundclip started!');
+            });
+
+            dispatcher.on('finish', () => {
+                console.log('finished playing!');
+                dispatcher.destroy();
+                //connection.disconnect();
+            });
+            dispatcher.on('error', console.error);
             if (queue.size > 0) {
+                console.log('there was a queue so we are wiping it');
                 queue.delete(state.guild.id);
             }
         }
-        return;
-    }
-    const channel = state.member.voice.channel;
-    if(channel && channel.members.size > 1) {
-        console.log(channel.members.size);
-        const connection = await channel.join();
-        const dispatcher = connection.play('sounds/hawkwood.mp3', { highWaterMark: 48}, {volume: false});// the highwater mark attribute prepares 36 audio packets before playback (buffer)
+        else if(!channel && oldState.channel.members.size === 1 ) {
+            console.log('disconnecting');
+            try {
+                await oldState.channel.leave();
+            } catch (err) {
+                console.log('an error trying to leave occurred');
+            }
 
-        dispatcher.on('start', ()=>{
-            console.log('hawkwood is now talking');
-        });
-
-        dispatcher.on('finish', () => {
-            console.log('finished playing!');
-            dispatcher.destroy();
-            //connection.disconnect();
-        });
-        dispatcher.on('error', console.error);
-    }
+        }
 });
 client.on('message', async message =>{
     if(message.author.bot) return;//if bot is talking no need to check any of this
@@ -118,31 +147,24 @@ client.on('message', async message =>{
             await message.delete();
         }
     //below covers words and phrases the bot will always look out for
-    const phrase = message.content;
-    if(phrase.includes('new bot') || phrase.includes('did you make this')){
-        return message.reply(`I am indeed a bot created by Tyrel to perform a variety of functions!\n\nIf you would like to know more ${message.author.username}, type "-help" into any channel.`);
-    }
+    const phrase = message.content.toLowerCase();
     //try to find a word in the array that can be found in the message
-    const censored = words.find(word => message.content.includes(word));
+    const censored = words.find(word => phrase.includes(word));
     if(!censored){
         console.log('no problems here');
     }else{
-        if(currency.getBalance(message.author.id) > 5){
+        if(currency.getBalance(message.author.id) > 30){
             await message.delete();
-            if(message.author.tag !== 'Bane Üme#8734' && message.author.tag !== 'Toi#0400' && message.author.tag !=='BlackNote#3519') {
-                console.log('should be good to change nickname')
-                try {
-                    message.member.setNickname(`naughty boy ${message.member.nickname}`);
-                } catch (err) {
-                    console.log(err);
-                }
-            }
-            await message.reply('Oy, that is enough bad language from you! Time to scrub this thread clean of that message!').then((reply) => reply.delete({timeout: 10000}));
-            }else{
-            await message.reply(`Mind the language! We need to keep this server family-friendly.`);
+            await message.reply('Oy, that is enough bad language from you! Time to scrub this message').then((reply) => reply.delete({timeout: 10000}));
+            }else if(currency.getBalance(message.author.id) > 25){
+            await message.reply(`You've been using foul language quite a lot recently! Try to keep it to a minimum`);
         }
         currency.add(message.author.id, 1);
         console.log(`new total for ${message.author.username} is ${currency.getBalance(message.author.id)}`);
+    }
+    if((phrase.includes(`i'll`) && phrase.includes(`join`)) || phrase.includes(`come on`) || phrase.includes(`coming on`) || phrase.includes(`later`)){
+        const attachment = new MessageAttachment(`images/dicaprio.jpg`);
+        await message.channel.send(attachment);
     }
 });
 
