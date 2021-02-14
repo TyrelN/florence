@@ -2,13 +2,14 @@ const fs = require('fs');
 const { Client, Collection, MessageAttachment} = require('discord.js');
 const {prefix, token} = require('./config.json');
 const {Users} = require('./dbObjects');
+const cron = require('node-cron');
 const currency = new Collection();
 const client = new Client();
 const queue = new Map();
 const members = new Map();
 client.commands = new Collection();
 client.music = new Collection();
-
+const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const musicFiles = fs.readdirSync('./music').filter(file => file.endsWith('.js'));
 //for every file found in this directory, set it as a known command for the discord client
 for(const file of musicFiles){
@@ -22,14 +23,32 @@ for(const file of commandFiles){
     client.commands.set(command.name, command);
 }
 //initialize and set the roster of sounds for each member
-members.set(`User#444`, new Map());
-members.get(`User#444`).set(1, 'sounds/ex1.mp3');
-members.get(`User#444`).set(2, 'sounds/ex2.mp3');
-members.get(`User#444`).set(3, 'sounds/ex3.mp3');
+members.set(`user#0400`, {//this is an object with the properties listed below
+    birthday: `february14`,
+    birthdayImage : new MessageAttachment('imageexample.jpg'),
+    birthdayMessage: `It seems your birthday is today. Happy Birthday! ${this.birthdayImage}`,
+    songList: new Map([ [1, 'sounds/ex1.mp3'], [2, 'sounds/ex2.mp3']]),
+});
 
 function randomSelect(min, max){
     return Math.floor(Math.random() * (max - min + 1) ) + min;
 }
+
+cron.schedule("* * * * *",  () => {
+    const d = new Date();
+    const currentDate = (months[d.getMonth()] + d.getDate()).toLowerCase();
+
+    console.log(`one minute passed! here's todays birthday: ` + currentDate);
+    members.forEach(async (memberData)=>{
+        console.log(memberData.birthday);
+        if(memberData.birthday === currentDate){
+            console.log(`there's a birthday today`);
+            const channel = client.channels.cache.get('809529649591353414');
+            channel.send(memberData.birthdayMessage);
+        }
+    });
+});
+
 
 //the inspected words are stored in a text file, for easy keyword editing
 const words = fs.readFileSync('curses.txt', 'utf-8').split(',');
@@ -55,7 +74,7 @@ Reflect.defineProperty(currency, 'getBalance', {
     },
 });
 client.once('ready', async () => {
-    //words.forEach(word => console.log(word));
+
     const storedBalances = await Users.findAll();
     storedBalances.forEach(b => currency.set(b.user_id, b));
     console.log(`Logged in as ${client.user.tag}!`);
@@ -86,7 +105,7 @@ client.on('voiceStateUpdate', async ( oldState, state) =>{
         }
         const channel = state.member.voice.channel;
         if (channel && channel.members.size > 1) {
-            let sound = members.get(state.member.user.tag).get(randomSelect(1,3));
+            let sound = members.get(state.member.user.tag).songList.get(randomSelect(1,3));
             if(!sound){
                 sound = `sounds/example.mp3`;
             }
