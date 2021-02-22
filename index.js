@@ -3,6 +3,7 @@ const { Client, Collection, MessageAttachment} = require('discord.js');
 const {prefix, token} = require('./config.json');
 const {Users} = require('./dbObjects');
 const cron = require('node-cron');
+const fetch = require('node-fetch');
 const currency = new Collection();
 const client = new Client();
 const queue = new Map();
@@ -155,7 +156,7 @@ client.on('message', async message =>{
                 console.error(error);
                 await message.reply('there was an error trying to execute that command. Big sad');
             }
-        }else{
+        }else if(client.music.has(commandName)){
             const serverQueue = queue.get(message.guild.id);
             const command = client.music.get(commandName);
             try{
@@ -181,7 +182,7 @@ client.on('message', async message =>{
         }
         currency.add(message.author.id, 1);
         console.log(`new total for ${message.author.username} is ${currency.getBalance(message.author.id)}`);
-    }else{
+    }else if(message.content.contains('florence')){
         const retort = fs.readFileSync('retorts.txt', 'utf-8').split(',');
         if(retort){
             console.log('we got a retort');
