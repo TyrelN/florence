@@ -23,18 +23,18 @@ for(const file of commandFiles){
     client.commands.set(command.name, command);
 }
 //initialize and set the roster of sounds for each member
-members.set(`user#0400`, {//this is an object with the properties listed below
-    birthday: `february14`,
-    birthdayImage : new MessageAttachment('imageexample.jpg'),
-    birthdayMessage: `It seems your birthday is today. Happy Birthday! ${this.birthdayImage}`,
+members.set(`User#0400`, {//this is an object with the properties listed below
+    birthday: `february25`,
+    birthdayImage : new MessageAttachment('images/dicaprio.jpg'),
+    birthdayMessage: `It seems your birthday is today. Happy Birthday!`,
     songList: new Map([ [1, 'sounds/ex1.mp3'], [2, 'sounds/ex2.mp3']]),
 });
 
-function randomSelect(min, max){
+function randomSelect(min, max){//ensures a random number between and including max and min
     return Math.floor(Math.random() * (max - min + 1) ) + min;
 }
 
-cron.schedule("* * * * *",  () => {
+cron.schedule("* * * * *",  () => {//node-cron task scheduler for checking for birthdays
     const d = new Date();
     const currentDate = (months[d.getMonth()] + d.getDate()).toLowerCase();
 
@@ -44,7 +44,7 @@ cron.schedule("* * * * *",  () => {
         if(memberData.birthday === currentDate){
             console.log(`there's a birthday today`);
             const channel = client.channels.cache.get('809529649591353414');
-            channel.send(memberData.birthdayMessage);
+            channel.send(memberData.birthdayMessage, memberdata.birthdayimage);
         }
     });
 });
@@ -52,6 +52,8 @@ cron.schedule("* * * * *",  () => {
 
 //the inspected words are stored in a text file, for easy keyword editing
 const words = fs.readFileSync('curses.txt', 'utf-8').split(',');
+
+const retorts = fs.readFileSync('retorts.txt', 'utf-8').split(',');
 
 Reflect.defineProperty(currency, 'add', {
     value: async function add(id, amount){
@@ -105,11 +107,12 @@ client.on('voiceStateUpdate', async ( oldState, state) =>{
         }
         const channel = state.member.voice.channel;
         if (channel && channel.members.size > 1) {
-            let sound = members.get(state.member.user.tag).songList.get(randomSelect(1,3));
-            if(!sound){
-                sound = `sounds/example.mp3`;
+            let sound = members.get(state.member.user.tag).songList.get(randomSelect(1,2));
+            if(!sound){//the default output if no user is found
+                sound = `sounds/example.mp3`;//will have to create a local folder named sounds and add mp3 files to use yourself
             }
             const connection = await channel.join()
+            //highwatermark buffers the sound clip before playing for a smoother output
             const dispatcher = connection.play(sound, { highWaterMark: 48}, {volume: false})
 
             dispatcher.on('start', ()=>{
@@ -169,9 +172,7 @@ client.on('message', async message =>{
     const phrase = message.content.toLowerCase();
     //try to find a word in the array that can be found in the message
     const censored = words.find(word => phrase.includes(word));
-    if(!censored){
-        console.log('no problems here');
-    }else{
+    if(censored){
         if(currency.getBalance(message.author.id) > 30){
             await message.delete();
             await message.reply('Oy, that is enough bad language from you! Time to scrub this message').then((reply) => reply.delete({timeout: 10000}));
@@ -180,6 +181,12 @@ client.on('message', async message =>{
         }
         currency.add(message.author.id, 1);
         console.log(`new total for ${message.author.username} is ${currency.getBalance(message.author.id)}`);
+    }else{
+        const retort = fs.readFileSync('retorts.txt', 'utf-8').split(',');
+        if(retort){
+            console.log('we got a retort');
+            await message.reply(`no you're ${retort.join(' ')}`);
+        }
     }
     if((phrase.includes(`i'll`) && phrase.includes(`join`)) || phrase.includes(`come on`) || phrase.includes(`coming on`) || phrase.includes(`later`)){
         const attachment = new MessageAttachment(`images/dicaprio.jpg`);
