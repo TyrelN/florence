@@ -1,14 +1,15 @@
 const fs = require('fs');
-const Discord = require('discord.js');
+const { Client, Collection, MessageAttachment} = require('discord.js');
 const {prefix, token} = require('./config.json');
 const {Users} = require('./dbObjects');
-const currency = new Discord.Collection();
-const client = new Discord.Client();
+const cron = require('node-cron');
+const currency = new Collection();
+const client = new Client();
 const queue = new Map();
-//const members = new Map();
-client.commands = new Discord.Collection();
-client.music = new Discord.Collection();
-
+const members = new Map();
+client.commands = new Collection();
+client.music = new Collection();
+const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const musicFiles = fs.readdirSync('./music').filter(file => file.endsWith('.js'));
 //for every file found in this directory, set it as a known command for the discord client
 for(const file of musicFiles){
@@ -21,8 +22,38 @@ for(const file of commandFiles){
     const command = require(`./commands/${file}`);
     client.commands.set(command.name, command);
 }
+//initialize and set the roster of sounds for each member
+members.set(`User#0400`, {//this is an object with the properties listed below
+    birthday: `february25`,
+    birthdayImage : new MessageAttachment('images/dicaprio.jpg'),
+    birthdayMessage: `It seems your birthday is today. Happy Birthday!`,
+    songList: new Map([ [1, 'sounds/ex1.mp3'], [2, 'sounds/ex2.mp3']]),
+});
+
+function randomSelect(min, max){//ensures a random number between and including max and min
+    return Math.floor(Math.random() * (max - min + 1) ) + min;
+}
+
+cron.schedule("* * * * *",  () => {//node-cron task scheduler for checking for birthdays
+    const d = new Date();
+    const currentDate = (months[d.getMonth()] + d.getDate()).toLowerCase();
+
+    console.log(`one minute passed! here's todays birthday: ` + currentDate);
+    members.forEach(async (memberData)=>{
+        console.log(memberData.birthday);
+        if(memberData.birthday === currentDate){
+            console.log(`there's a birthday today`);
+            const channel = client.channels.cache.get('809529649591353414');
+            channel.send(memberData.birthdayMessage, memberdata.birthdayimage);
+        }
+    });
+});
+
+
 //the inspected words are stored in a text file, for easy keyword editing
 const words = fs.readFileSync('curses.txt', 'utf-8').split(',');
+
+const retorts = fs.readFileSync('retorts.txt', 'utf-8').split(',');
 
 Reflect.defineProperty(currency, 'add', {
     value: async function add(id, amount){
@@ -45,7 +76,7 @@ Reflect.defineProperty(currency, 'getBalance', {
     },
 });
 client.once('ready', async () => {
-    //words.forEach(word => console.log(word));
+
     const storedBalances = await Users.findAll();
     storedBalances.forEach(b => currency.set(b.user_id, b));
     console.log(`Logged in as ${client.user.tag}!`);
@@ -61,33 +92,53 @@ client.once('disconnect', () =>{
 });
 
 
-client.on('voiceStateUpdate', async state =>{
-    if(state.member.user.bot){
-        if (!state.connection) {
-            console.log('bot disconnected, wiping queue');
+client.on('voiceStateUpdate', async ( oldState, state) =>{
+        if(oldState.channelID === state.channelID){//this infers that the update was just mute or deafen
+            return;
+            }
+        if (state.member.user.bot) {
+            if (!state.connection) {
+                console.log('bot disconnected, wiping queue');
+                if (queue.size > 0) {
+                    queue.delete(state.guild.id);
+                }
+            }
+            return;
+        }
+        const channel = state.member.voice.channel;
+        if (channel && channel.members.size > 1) {
+            let sound = members.get(state.member.user.tag).songList.get(randomSelect(1,2));
+            if(!sound){//the default output if no user is found
+                sound = `sounds/example.mp3`;//will have to create a local folder named sounds and add mp3 files to use yourself
+            }
+            const connection = await channel.join()
+            //highwatermark buffers the sound clip before playing for a smoother output
+            const dispatcher = connection.play(sound, { highWaterMark: 48}, {volume: false})
+
+            dispatcher.on('start', ()=>{
+                console.log('soundclip started!');
+            });
+
+            dispatcher.on('finish', () => {
+                console.log('finished playing!');
+                dispatcher.destroy();
+                //connection.disconnect();
+            });
+            dispatcher.on('error', console.error);
             if (queue.size > 0) {
+                console.log('there was a queue so we are wiping it');
                 queue.delete(state.guild.id);
             }
         }
-        return;
-    }
-    const channel = state.member.voice.channel;
-    if(channel && channel.members.size > 1) {
-        console.log(channel.members.size);
-        const connection = await channel.join();
-        const dispatcher = connection.play('sounds/hawkwood.mp3', { highWaterMark: 48}, {volume: false});// the highwater mark attribute prepares 36 audio packets before playback (buffer)
+        else if(!channel && oldState.channel.members.size === 1 ) {
+            console.log('disconnecting');
+            try {
+                await oldState.channel.leave();
+            } catch (err) {
+                console.log('an error trying to leave occurred');
+            }
 
-        dispatcher.on('start', ()=>{
-            console.log('hawkwood is now talking');
-        });
-
-        dispatcher.on('finish', () => {
-            console.log('finished playing!');
-            dispatcher.destroy();
-            //connection.disconnect();
-        });
-        dispatcher.on('error', console.error);
-    }
+        }
 });
 client.on('message', async message =>{
     if(message.author.bot) return;//if bot is talking no need to check any of this
@@ -118,20 +169,28 @@ client.on('message', async message =>{
             await message.delete();
         }
     //below covers words and phrases the bot will always look out for
-
+    const phrase = message.content.toLowerCase();
     //try to find a word in the array that can be found in the message
-    const censored = words.find(word => message.content.includes(word));
-    if(!censored){
-        console.log('no problems here');
-    }else{
-        if(currency.getBalance(message.author.id) > 5){
+    const censored = words.find(word => phrase.includes(word));
+    if(censored){
+        if(currency.getBalance(message.author.id) > 30){
             await message.delete();
-            await message.reply('Oy, that is enough bad language from you! Time to scrub this thread clean of that message!').then((reply) => reply.delete({timeout: 10000}));
-            }else{
-            await message.reply(`Mind the language! We need to keep this server family-friendly.`);
+            await message.reply('Oy, that is enough bad language from you! Time to scrub this message').then((reply) => reply.delete({timeout: 10000}));
+            }else if(currency.getBalance(message.author.id) > 25){
+            await message.reply(`You've been using foul language quite a lot recently! Try to keep it to a minimum`);
         }
         currency.add(message.author.id, 1);
         console.log(`new total for ${message.author.username} is ${currency.getBalance(message.author.id)}`);
+    }else{
+        const retort = fs.readFileSync('retorts.txt', 'utf-8').split(',');
+        if(retort){
+            console.log('we got a retort');
+            await message.reply(`no you're ${retort.join(' ')}`);
+        }
+    }
+    if((phrase.includes(`i'll`) && phrase.includes(`join`)) || phrase.includes(`come on`) || phrase.includes(`coming on`) || phrase.includes(`later`)){
+        const attachment = new MessageAttachment(`images/dicaprio.jpg`);
+        await message.channel.send(attachment);
     }
 });
 

@@ -5,6 +5,7 @@
     "@discordjs/opus": "github:discordjs/opus",
     "discord.js": "^12.5.1",
     "ffmpeg-static": "^4.2.7",
+    "node-cron": "^2.0.3",
     "node-fetch": "^2.6.1",
     "opusscript": "0.0.7",
     "sequelize": "^6.5.0",

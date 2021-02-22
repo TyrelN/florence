@@ -17,6 +17,8 @@ module.exports = {
                 playSong(guild, serverQueue.songs[0]);
             })
                 .on("error", error => console.error(error));
+            dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
+            dispatcher.setVolume(0.2);
             serverQueue.textChannel.send(`playing **${song.title}**`).then((reply) => reply.delete({timeout: 30000}));
 
         }
