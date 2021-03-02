@@ -11,6 +11,16 @@ const members = new Map();
 client.commands = new Collection();
 client.music = new Collection();
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const createUser = async (id, amount) =>{
+    const newUser = await Users.create({user_id: id, balance: amount});
+    currency.set(id, newUser);
+    return newUser;
+};
+module.exports = {
+    createUser: createUser,
+    currency: currency,
+};
+
 const musicFiles = fs.readdirSync('./music').filter(file => file.endsWith('.js'));
 //for every file found in this directory, set it as a known command for the discord client
 for(const file of musicFiles){
@@ -26,25 +36,23 @@ for(const file of commandFiles){
 //initialize and set the roster of sounds for each member
 members.set(`User#0400`, {//this is an object with the properties listed below
     birthday: `february25`,
-    birthdayImage : new MessageAttachment('images/dicaprio.jpg'),
+    //birthdayImage : new MessageAttachment('images/example.png'),
     birthdayMessage: `It seems your birthday is today. Happy Birthday!`,
-    songList: new Map([ [1, 'sounds/ex1.mp3'], [2, 'sounds/ex2.mp3']]),
 });
 
 function randomSelect(min, max){//ensures a random number between and including max and min
     return Math.floor(Math.random() * (max - min + 1) ) + min;
 }
 
-cron.schedule("* * * * *",  () => {//node-cron task scheduler for checking for birthdays
+cron.schedule("5 8 * * *",  () => {//node-cron task scheduler for checking for birthdays
     const d = new Date();
     const currentDate = (months[d.getMonth()] + d.getDate()).toLowerCase();
 
-    console.log(`one minute passed! here's todays birthday: ` + currentDate);
+    console.log(`another day! here's todays birthday: ` + currentDate);
     members.forEach(async (memberData)=>{
-        console.log(memberData.birthday);
         if(memberData.birthday === currentDate){
             console.log(`there's a birthday today`);
-            const channel = client.channels.cache.get('809529649591353414');
+            const channel = client.channels.cache.get('80952964959135563414');
             channel.send(memberData.birthdayMessage, memberdata.birthdayimage);
         }
     });
@@ -64,9 +72,7 @@ Reflect.defineProperty(currency, 'add', {
             return user.save();
         }
         //if there isn't a user, create one in the database using their discord id as the user_id
-        const newUser = await Users.create({user_id: id, balance: amount});
-        currency.set(id, newUser);
-        return newUser;
+       createUser(id, amount);
     },
 });
 
@@ -107,12 +113,24 @@ client.on('voiceStateUpdate', async ( oldState, state) =>{
             return;
         }
         const channel = state.member.voice.channel;
-        if (channel && channel.members.size > 1) {
-            let sound = members.get(state.member.user.tag).songList.get(randomSelect(1,2));
-            if(!sound){//the default output if no user is found
-                sound = `sounds/example.mp3`;//will have to create a local folder named sounds and add mp3 files to use yourself
+        if (channel && channel.members.size > 0) {
+            // = members.get(state.member.user.tag).songList.get(randomSelect(1,2));
+            let sound = ``;
+            const user = await Users.findOne({ where: { user_id: state.member.user.id } });
+            if(!user){
+                sound = `./sounds/example.mp3`;
+            }else{
+               const sounds = await user.getItems();
+                console.log(`here are this users sounds: ${sounds}`);
+                if(!sounds.length){//the default output if no user is found
+                    sound = `./sounds/example.mp3`;//will have to create a local folder named sounds and add mp3 files to use yourself
+                }else{
+                    sound = sounds[randomSelect(0, sounds.length - 1)].item_id;
+                    console.log(`HERE'S THE SOUND WE GOT: ${sound}`);
+                }
             }
             const connection = await channel.join()
+            console.log('ATTEMPTING THE SONG');
             //highwatermark buffers the sound clip before playing for a smoother output
             const dispatcher = connection.play(sound, { highWaterMark: 48}, {volume: false})
 
@@ -144,6 +162,7 @@ client.on('voiceStateUpdate', async ( oldState, state) =>{
 client.on('message', async message =>{
     if(message.author.bot) return;//if bot is talking no need to check any of this
     if(message.content.startsWith(prefix)){
+     
         const args = message.content.slice(prefix.length).trim().split(/ +/);//slice removes the prefix, trim cuts out stray white spaces, then split turns the spaced words into arguments
         const commandName = args.shift().toLowerCase();
         const commandArgs = args.join(' ');//puts the array elements back into one string seperated by a space
@@ -151,7 +170,7 @@ client.on('message', async message =>{
         if(client.commands.has(commandName)){
             const command = client.commands.get(commandName);
             try{
-                command.execute(message, commandArgs, currency );
+                command.execute(message, commandArgs);
             }catch(error){
                 console.error(error);
                 await message.reply('there was an error trying to execute that command. Big sad');
@@ -166,8 +185,9 @@ client.on('message', async message =>{
                 console.error(error);
                 await message.reply('there was an error trying to execute that command. Big sad');
             }
-        }
-            await message.delete();
+        
+    }
+            await message.delete(({timeout: 10000}));
         }
     //below covers words and phrases the bot will always look out for
     const phrase = message.content.toLowerCase();
@@ -182,16 +202,12 @@ client.on('message', async message =>{
         }
         currency.add(message.author.id, 1);
         console.log(`new total for ${message.author.username} is ${currency.getBalance(message.author.id)}`);
-    }else if(message.content.contains('florence')){
+    }else if(message.content.includes('florence')){
         const retort = fs.readFileSync('retorts.txt', 'utf-8').split(',');
         if(retort){
             console.log('we got a retort');
             await message.reply(`no you're ${retort.join(' ')}`);
         }
-    }
-    if((phrase.includes(`i'll`) && phrase.includes(`join`)) || phrase.includes(`come on`) || phrase.includes(`coming on`) || phrase.includes(`later`)){
-        const attachment = new MessageAttachment(`images/dicaprio.jpg`);
-        await message.channel.send(attachment);
     }
 });
 

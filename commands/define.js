@@ -1,10 +1,10 @@
 const fetch = require('node-fetch');
 const querystring = require('querystring');
-
+const { MessageEmbed } = require('discord.js');
 module.exports = {
     name: 'define',
     description: 'urban dictionary definition of args',
-    execute(message, commandArgs, currency) {
+    async execute(message, commandArgs, currency) {
         if(!commandArgs.length){
             return;
         }
@@ -15,13 +15,13 @@ module.exports = {
            return message.channel.send('No results for your query');
     }
     const trim = (str, max) => ((str.length > max) ? `${str.slice(0, max - 3)}...` : str);
-    const [answer] = list; // gets list[0] as a default and assigns answer as the json object
+    const [answer] = list[0]; // gets list[0] as a default and assigns answer as the json object
 
     const embed = new MessageEmbed()
         .setColor('#EFFF00')
         .setTitle(answer.word)
         .setURL(answer.permalink)
-        .addField(
+        .addFields(
             {name: 'Definition', value: trim(answer.definition, 1024)},
             {name: 'Example', value: trim(answer.example, 1024)}, 
             { name: 'Rating', value: `${answer.thumbs_up} thumbs up. ${answer.thumbs_down} thumbs down.`},
