@@ -17,6 +17,7 @@ display via command or perhaps as a daily message.<br>
 # References:<br>
 https://discordjs.guide/<br>
 https://gabrieltanner.org/blog/dicord-music-bot<br>
-https://medium.com/@andre.devries/how-to-create-a-task-scheduler-in-nodejs-ad67eadad467
-
+https://medium.com/@andre.devries/how-to-create-a-task-scheduler-in-nodejs-ad67eadad467<br>
+https://dev.to/masbagal/saving-image-from-url-using-node-js-5an6<br>
+https://flaviocopes.com/node-download-image/
 
