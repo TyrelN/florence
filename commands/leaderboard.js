@@ -1,7 +1,7 @@
 module.exports = {
     name: 'leaderboard',
     description: 'shows a leaderboard of the 10 richest members',
-    execute(message, commandArgs, currency) {
+    execute(message, commandArgs) {
         return message.channel.send(
             currency.sort((a, b) => b.balance - a.balance)
                 .filter(user => client.users.cache.has(user.user_id))

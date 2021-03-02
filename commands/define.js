@@ -4,7 +4,7 @@ const { MessageEmbed } = require('discord.js');
 module.exports = {
     name: 'define',
     description: 'urban dictionary definition of args',
-    async execute(message, commandArgs, currency) {
+    async execute(message, commandArgs) {
         if(!commandArgs.length){
             return;
         }

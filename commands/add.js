@@ -1,9 +1,8 @@
 //https://flaviocopes.com/node-download-image/ referenced
 const { Users } = require('../dbObjects');
-const { Op } = require('sequelize');
 const fs = require('fs');
 const fetch = require('node-fetch');
-const {createUser, currency}  = require('../index.js');
+const {createUser}  = require('../index.js');
 module.exports = {
     name: 'add',
     description: 'adds a sound for your profile to the notification roster',
