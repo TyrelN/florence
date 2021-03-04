@@ -1,5 +1,6 @@
 const {Users, CurrencyShop } = require('../dbObjects');
 const { Op } = require('sequelize');
+const { currency } = require('../index.js');
 module.exports = {
     name: 'buy',
     description: 'purchases the item specified as an argument, then activates the item',

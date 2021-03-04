@@ -1,4 +1,5 @@
 const Sequelize = require('sequelize');
+const { Op } = require('sequelize');
 
 const sequelize = new Sequelize('database', 'username', 'password', {
     host: 'localhost',
@@ -28,16 +29,18 @@ Users.prototype.addItem = async function(item){
 
 Users.prototype.removeItem = async function(item){
     const userItem = await UserItems.findOne({
-        where:{user_id: this.user_id, item_id: item },
+        where:{user_id: this.user_id, item_id:  { [Op.like]: `%${item}%` }  },
     });
+    console.log(`queried database using: ${item}`);
 
     if(userItem){
+        console.log(`found useritem: ${userItem}`);
         const pathName =  userItem.item_id;
         //there's already an item with this name, return;
         await userItem.destroy();//removes entry from database
         return pathName;
     }
-    return 'Zero results. No path was ';
+    return;
 
 };
 
