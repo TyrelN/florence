@@ -1,9 +1,10 @@
 const {Users, CurrencyShop } = require('../dbObjects');
 const { Op } = require('sequelize');
+const { currency } = require('../index.js');
 module.exports = {
     name: 'buy',
     description: 'purchases the item specified as an argument, then activates the item',
-    async execute(message, commandArgs, currency) {
+    async execute(message, commandArgs) {
         //this returns all sections that aren't like a mention, and assumes this is item to buy
         const complimentType = commandArgs.split(/ +/g).find(arg => !/<@!?\d+>/g.test(arg));
         const target = message.mentions.users.first();
