@@ -16,9 +16,13 @@ const createUser = async (id, amount) =>{
     currency.set(id, newUser);
     return newUser;
 };
+const randomSelect = (min, max) =>{//ensures a random number between and including max and min
+    return Math.floor(Math.random() * (max - min + 1) ) + min;
+}
 module.exports = {
     createUser: createUser,
     currency: currency,
+    randomSelect: randomSelect,
 };
 
 const musicFiles = fs.readdirSync('./music').filter(file => file.endsWith('.js'));
@@ -40,11 +44,9 @@ members.set(`User#0400`, {//this is an object with the properties listed below
     birthdayMessage: `It seems your birthday is today. Happy Birthday!`,
 });
 
-function randomSelect(min, max){//ensures a random number between and including max and min
-    return Math.floor(Math.random() * (max - min + 1) ) + min;
-}
-
-cron.schedule("5 8 * * *",  () => {//node-cron task scheduler for checking for birthdays
+//cron.schedule("5 8 * * *",  () => {//node-cron task scheduler for checking for birthdays
+cron.schedule("* * * * *",  () => { 
+    const channel = client.channels.cache.get('809529649591353414'); 
     const d = new Date();
     const currentDate = (months[d.getMonth()] + d.getDate()).toLowerCase();
 
@@ -52,10 +54,18 @@ cron.schedule("5 8 * * *",  () => {//node-cron task scheduler for checking for b
     members.forEach(async (memberData)=>{
         if(memberData.birthday === currentDate){
             console.log(`there's a birthday today`);
-            const channel = client.channels.cache.get('80952964959135563414');
+            channel.send(`@here it seems we have a birthday today.`);
             channel.send(memberData.birthdayMessage, memberdata.birthdayimage);
         }
     });
+    //this is where we can put announcements
+    const announcement = fs.readFileSync('announcement.txt', 'utf-8');
+    if(announcement){
+            channel.send(`${announcement}`);
+            fs.writeFile('announcement.txt', '', () => {console.log('annoucement wiped')});
+        }else{
+            console.log('there is no announcement today');
+        }
 });
 
 
@@ -97,7 +107,6 @@ client.once('disconnect', () =>{
     console.log(`disconnecting:`);
 
 });
-
 
 client.on('voiceStateUpdate', async ( oldState, state) =>{
         if(oldState.channelID === state.channelID){//this infers that the update was just mute or deafen
@@ -184,8 +193,7 @@ client.on('message', async message =>{
             }catch(error){
                 console.error(error);
                 await message.reply('there was an error trying to execute that command. Big sad');
-            }
-        
+            }  
     }
             await message.delete(({timeout: 10000}));
         }
@@ -203,10 +211,10 @@ client.on('message', async message =>{
         currency.add(message.author.id, 1);
         console.log(`new total for ${message.author.username} is ${currency.getBalance(message.author.id)}`);
     }else if(message.content.includes('florence')){
-        const retort = fs.readFileSync('retorts.txt', 'utf-8').split(',');
+        const retort = retorts.find(comment => phrase.includes(comment));
         if(retort){
             console.log('we got a retort');
-            await message.reply(`no you're ${retort.join(' ')}`);
+            await message.reply(`no you're ${retort}`);
         }
     }
 });
