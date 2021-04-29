@@ -12,7 +12,7 @@ This bot was built mostly for my own amusement. All of the features however can 
 # Setup Tips:<br>
 -This program requires Node.Js on the host computer to function.<br>
 -In a terminal at the root project folder, type: "Node dbInit.js" To initialize a local database for the currency/shop system.<br>
--Once you've set up your own bot at https://discord.com/developers/applications/ , you will need to grab the unique generated token and apply it to a "config.json" file with a 'token' and 'prefix' value. Use the generated token code for the first value, and the key you want pressed before a command as the second (example: "!").<br>
+-Once you've set up your own bot at https://discord.com/developers/applications/ , you will need to grab the uniquely generated token and apply it to a "config.json" file with a 'token' and 'prefix' value. Use the generated token value for the first parameter, and the key you want pressed before a command as the second (example: "!").<br>
 -To use the local audio and keyword detection functionality, you will need to provide your own mp3 and text files (text file must have keywords seperated by a comma) and link them within the index.js file in the appropriate areas.<br><br>
 # References:<br>
 https://discordjs.guide/<br>
