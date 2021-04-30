@@ -62,7 +62,7 @@ cron.schedule("* * * * *",  () => {
     const announcement = fs.readFileSync('announcement.txt', 'utf-8');
     if(announcement){
             channel.send(`${announcement}`);
-            fs.writeFile('announcement.txt', '', () => {console.log('annoucement wiped')});
+            fs.writeFile('announcement.txt', '', () => {console.log('announcement wiped')});
         }else{
             console.log('there is no announcement today');
         }
