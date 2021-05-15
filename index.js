@@ -121,8 +121,12 @@ client.on('voiceStateUpdate', async ( oldState, state) =>{
             }
             return;
         }
+        if(queue.size > 0){//if songs are currently playing, do not disturb with a sound notification
+            console.log('a song is currently playing, so no sounds will override it.')
+            return;
+        }
         const channel = state.member.voice.channel;
-        if (channel && channel.members.size > 0) {
+        if (channel && channel.members.size > 1) {
             // = members.get(state.member.user.tag).songList.get(randomSelect(1,2));
             let sound = ``;
             const user = await Users.findOne({ where: { user_id: state.member.user.id } });
