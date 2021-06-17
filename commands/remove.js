@@ -17,9 +17,9 @@ module.exports = {
         }
         const result = await user.removeItem(term);
         if(result){
-               message.channel.send(`alright this path was removed: ${result}`);
+               message.channel.send(`alright this path was removed: ${result}`).then((reply) => reply.delete({timeout: 10000}));
         }else{
-               message.channel.send(`There was no path found with your query!`);
+               message.channel.send(`There was no path found with your query!`).then((reply) => reply.delete({timeout: 10000}));
          }
     
     },

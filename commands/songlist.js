@@ -15,6 +15,6 @@ module.exports = {
         const items = await user.getItems();
         //console.log(`${items}`);
         if (!items.length) return message.channel.send(`${target.tag} has nothing!`);
-        return message.channel.send(`${target.tag} currently has ${items.map(i => `${i.item_id}`).join(', ')}`);
+        return message.channel.send(`${target.tag} currently has ${items.map(i => `${i.item_id}`).join(', ')}`).then((reply) => reply.delete({timeout: 10000}));
     },
 };

@@ -23,6 +23,7 @@ module.exports = {
     createUser: createUser,
     currency: currency,
     randomSelect: randomSelect,
+    client: client,
 };
 
 const musicFiles = fs.readdirSync('./music').filter(file => file.endsWith('.js'));
@@ -37,27 +38,20 @@ for(const file of commandFiles){
     const command = require(`./commands/${file}`);
     client.commands.set(command.name, command);
 }
-//initialize and set the roster of sounds for each member
-members.set(`User#0400`, {//this is an object with the properties listed below
-    birthday: `february25`,
-    //birthdayImage : new MessageAttachment('images/example.png'),
-    birthdayMessage: `It seems your birthday is today. Happy Birthday!`,
-});
-
 //cron.schedule("5 8 * * *",  () => {//node-cron task scheduler for checking for birthdays
-cron.schedule("* * * * *",  () => { 
+cron.schedule("* * * * *", async () => { 
     const channel = client.channels.cache.get('809529649591353414'); 
     const d = new Date();
     const currentDate = (months[d.getMonth()] + d.getDate()).toLowerCase();
 
     console.log(`another day! here's todays birthday: ` + currentDate);
-    members.forEach(async (memberData)=>{
-        if(memberData.birthday === currentDate){
-            console.log(`there's a birthday today`);
-            channel.send(`@here it seems we have a birthday today.`);
-            channel.send(memberData.birthdayMessage, memberdata.birthdayimage);
-        }
-    });
+    const birthdayPerson = await Users.findOne({ where: { birthday: currentDate}});
+    if(birthdayPerson){
+        console.log(`there's a birthday today ${birthdayPerson.birthday}`);
+        channel.send(`It seems we have a birthday today! ${birthdayPerson.birthday_message}`);
+    }else{
+        console.log('no birthday found');
+    }
     //this is where we can put announcements
     const announcement = fs.readFileSync('announcement.txt', 'utf-8');
     if(announcement){
@@ -126,7 +120,7 @@ client.on('voiceStateUpdate', async ( oldState, state) =>{
             return;
         }
         const channel = state.member.voice.channel;
-        if (channel && channel.members.size > 1) {
+        if (channel && channel.members.size > 0) {
             // = members.get(state.member.user.tag).songList.get(randomSelect(1,2));
             let sound = ``;
             const user = await Users.findOne({ where: { user_id: state.member.user.id } });
@@ -208,10 +202,10 @@ client.on('message', async message =>{
     if(censored){
         if(currency.getBalance(message.author.id) > 30){
             await message.delete();
-            await message.reply('Oy, that is enough bad language from you! Time to scrub this message').then((reply) => reply.delete({timeout: 10000}));
+            await message.reply('Uh oh, your swear jar balance is too high! Try buying someone a compliment to lower your swear jar balance.').then((reply) => reply.delete({timeout: 10000}));
             }else if(currency.getBalance(message.author.id) > 25){
-            await message.reply(`You've been using foul language quite a lot recently! Try to keep it to a minimum`);
-        }
+            await message.reply(`Your swear jar balance is alarmingly high! Try '-buy'-ing someone a compliment!`);
+            }
         currency.add(message.author.id, 1);
         console.log(`new total for ${message.author.username} is ${currency.getBalance(message.author.id)}`);
     }else if(message.content.includes('florence')){

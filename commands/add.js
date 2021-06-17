@@ -27,7 +27,8 @@ module.exports = {
                 console.log('created and obtained the user');
             }
             await user.addItem(path);
-            console.log('songpath added!')
+            console.log(`alright this sound path was added: ${name}`);
+            message.channel.send(`alright, this sound file was added to your list: ${name}`).then((reply) => reply.delete({timeout: 10000}));
         }
         else{
             message.channel.send('You need to upload an mp3 file with this command! (example: -add (file upload))').then((reply) => reply.delete({timeout: 10000}));

@@ -15,6 +15,13 @@ const UserItems = require('./models/UserItems')(sequelize, Sequelize.DataTypes);
 UserItems.belongsTo(CurrencyShop, {foreignKey: 'item_id', as: 'item'});
 
 Users.prototype.addItem = async function(item){
+    const userItem = await UserItems.findOrCreate({ //if a data entry does not exist, make one with the where parameters
+        where:{user_id: this.user_id, item_id: item },
+    });
+    return userItem.item_id;
+};
+
+Users.prototype.addBirthday = async function(item){
     const userItem = await UserItems.findOne({
         where:{user_id: this.user_id, item_id: item },
     });
