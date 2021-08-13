@@ -1,6 +1,6 @@
 # Florence
 A multi-purpose discord bot using discord.js!  
-This bot was built mostly for my own amusement. All of the features however can easily be repurposed for general use.<br><br>
+This bot was built mostly for my friends and myself. All of the features however can easily be repurposed for general use.<br><br>
 # Features:<br>
 -Basic music functionality: Florence can play audio from youtube videos, and store a queue of videos to play in sequence with the ability to display a queue, stop a queue or skip a song.<br>
 -Simple currency/keyword detection system: local text files hold keywords that are consistently checked for in messages, which triggers a currency increase in a member's balance. The balance and member data is stored with an SQLite database. There are additional checks for mentions of the bot for cheeky retort purposes (just for fun, can be removed).<br>
