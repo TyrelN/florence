@@ -7,7 +7,7 @@ This bot was built mostly for my friends and myself. All of the features however
 -Voice Channel audio notification: When members join a voice channel that already holds a user, the bot will join as well and play a randomly chosen sound clip that was added to the database (by either the user or admin).<br>
 -Shopping for compliments: Users can "-buy" a variety of compliments and praise messages for other users that will spend your tokens, which in turn will put you in good standing with the bot.<br>
 -Web-scraped Dota 2 statistics: Florence can grab win rate and pick rate data from https://www.dotabuff.com/ to display to users via a command.<br>
--Daily announcements: Users can store any text input given with a command, storing it in a text file on the host server. Florence will check that text file at a specified time of day and send the message's contents to a specified channel. The textfile will be wiped after the message is broadcast.
+-Daily announcements: Users can store any text input given with a command in a text file on the host server. Florence will check that text file at a specified time of day and send the message's contents to a specified channel. The textfile will be wiped after the message is broadcast.
 <br>
 -Birthday accounts: Users can add a birthday and a birthday message to their personal account within the SQLite database. Florence, in addition to announcements, checks daily for any server member's birthday on file, and sends them a specified birthday message with it.
 
