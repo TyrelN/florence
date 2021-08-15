@@ -37,16 +37,10 @@ for(const file of commandFiles){
     const command = require(`./commands/${file}`);
     client.commands.set(command.name, command);
 }
-//initialize and set the roster of sounds for each member
-members.set(`User#0400`, {//this is an object with the properties listed below
-    birthday: `february25`,
-    //birthdayImage : new MessageAttachment('images/example.png'),
-    birthdayMessage: `It seems your birthday is today. Happy Birthday!`,
-});
 
 //cron.schedule("5 8 * * *",  () => {//node-cron task scheduler for checking for birthdays
 cron.schedule("* * * * *",  () => { 
-    const channel = client.channels.cache.get('809529649591353414'); 
+    const channel = client.channels.cache.get('809529649591353414'); //replace this number with the discord channel ID of your choosing
     const d = new Date();
     const currentDate = (months[d.getMonth()] + d.getDate()).toLowerCase();
 
@@ -208,9 +202,9 @@ client.on('message', async message =>{
     if(censored){
         if(currency.getBalance(message.author.id) > 30){
             await message.delete();
-            await message.reply('Oy, that is enough bad language from you! Time to scrub this message').then((reply) => reply.delete({timeout: 10000}));
+            await message.reply('You have used too many unallowed words! Your message will not go through while your balance is this high.').then((reply) => reply.delete({timeout: 10000}));
             }else if(currency.getBalance(message.author.id) > 25){
-            await message.reply(`You've been using foul language quite a lot recently! Try to keep it to a minimum`);
+            await message.reply(`You've used a lot of frowned upon words recently! Try to keep it to a minimum, and use "-compliment" to lower your balance`);
         }
         currency.add(message.author.id, 1);
         console.log(`new total for ${message.author.username} is ${currency.getBalance(message.author.id)}`);

@@ -34,7 +34,7 @@ module.exports = {
                 break;
             case 'blessing':
                 if(!target){
-                    message.channel.send(`@here, ${message.author} sends blessings to all. May god smile upon thee`);
+                    message.channel.send(`@here, ${message.author} sends blessings to all. May the heavens smile upon thee`);
                 }else{
                     message.channel.send(`${target}, blessings upon you from ${message.author}. May the boat god bless you with a yacht`);
                 }
