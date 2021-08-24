@@ -13,8 +13,7 @@ This bot was built mostly for my friends and myself. All of the features however
 * Birthday accounts: Users can add a birthday and a birthday message to their personal account within the SQLite database. Florence, in addition to announcements, checks daily for any server member's birthday on file, and sends them a specified birthday message with it.
 <br><br>
 #Demo Video
-https://youtu.be/ive_aA3E6GU
-https://user-images.githubusercontent.com/43082470/130387060-7b9bebd2-b46b-4b83-90e1-2041b4dc35ca.mp4
+https://www.youtube.com/watch?v=c3mvTXFVl98
 <br><br>
 # Setup Tips:<br>
 * This program requires [Node.Js](https://nodejs.org/en/) on the host computer to function.<br>
