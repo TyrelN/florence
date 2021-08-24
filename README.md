@@ -12,7 +12,7 @@ This bot was built mostly for my friends and myself. All of the features however
 * Daily announcements: Users can store any text input given with a command in a text file on the host server. Florence will check that text file at a specified time of day and send the message's contents to a specified channel. The textfile will be wiped after the message is broadcast.<br>
 * Birthday accounts: Users can add a birthday and a birthday message to their personal account within the SQLite database. Florence, in addition to announcements, checks daily for any server member's birthday on file, and sends them a specified birthday message with it.
 <br><br>
-#Demo Video
+# Demo Video
 https://www.youtube.com/watch?v=c3mvTXFVl98
 <br><br>
 # Setup Tips:<br>
