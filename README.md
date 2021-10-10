@@ -3,6 +3,8 @@
 # Florence
 A multi-faceted Discord bot using [discord.js](https://discord.js.org/#/).
 
+Watch a video demo of the app [here](https://www.youtube.com/watch?v=c3mvTXFVl98)
+
 ## Features
 
 ### Music Functionality: 
@@ -22,8 +24,6 @@ Users can store any text input given with a command in a text file on the host s
 ### Birthday Accounts
 Users can add a birthday and a birthday message to another user's personal account within the SQLite database. Florence, in addition to announcements, checks daily for any server member's birthday on file, and sends them the message stored.
 
-# Demo Video
-https://www.youtube.com/watch?v=c3mvTXFVl98
 <br><br>
 # Setup Tips:<br>
 * This program requires [Node.Js](https://nodejs.org/en/) on the host computer to function.<br>
