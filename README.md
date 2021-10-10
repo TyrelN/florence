@@ -7,7 +7,7 @@ Watch a video demo of the app [here](https://www.youtube.com/watch?v=c3mvTXFVl98
 
 ## Features
 
-### Music Functionality: 
+### Music Functionality
 Florence can play audio from youtube videos, and store a queue of videos to play in sequence with the ability to display a queue, stop a queue or skip a song.
 
 ### Simple Currency/Keyword Detection
@@ -24,13 +24,21 @@ Users can store any text input given with a command in a text file on the host s
 ### Birthday Accounts
 Users can add a birthday and a birthday message to another user's personal account within the SQLite database. Florence, in addition to announcements, checks daily for any server member's birthday on file, and sends them the message stored.
 
-<br><br>
-# Setup Tips:<br>
-* This program requires [Node.Js](https://nodejs.org/en/) on the host computer to function.<br>
-* In a terminal at the root project folder, type: "Node dbInit.js" To initialize a local SQLite database for user account-related features.<br>
-* Once you've set up your own bot [here](https://discord.com/developers/applications/ ), you will need to grab the uniquely generated token and apply it to a "config.json" file with a 'token' and 'prefix' value. Use the generated token value for the first parameter, and the key you want pressed before a command as the second (example: "!").<br>
-* To use the local audio and keyword detection functionality, you will need to provide/upload your own mp3 and text files (text file must have keywords seperated by a comma) and link them within the index.js file in the appropriate areas.<br><br>
-# References:<br>
+## Project Status and Limitations
+The project for the most part is feature-complete and fully functional. On a code-base and usability level, however, there is plenty of room for improvement:
+* Logic is tightly coupled within modules, making it difficult to read.
+* There is no unit-testing, partially due to the point above.
+* Keyword detection being hard-coded to a text file is not user friendly.
+
+A code-refactoring and cleanup would greatly benefit the project and it's readability, in addition to making future improvements and updates easier.
+
+# Setup Tips
+* This program requires [Node.Js](https://nodejs.org/en/) on the host computer to function.
+* A discord application account and project must be created [here](https://discord.com/developers/applications/ ). The unique token generated can be applied to a JSON file (ex. config.json) as environment variables that can then be accessed in index.js. The prefix value is also imported as an environment variable.
+* type `node dbInit.js` to initialize the sqlite database.
+* type `node index.js` to start the project.
+* Keyword detection relies on a textfile where each word to be detected is comma-seprated. within the index.js file in the appropriate areas.<br><br>
+## References
 https://discordjs.guide/<br>
 https://gabrieltanner.org/blog/dicord-music-bot<br>
 https://medium.com/@andre.devries/how-to-create-a-task-scheduler-in-nodejs-ad67eadad467<br>
